@@ -87,9 +87,9 @@ local function openUI(self, button)
   local core = getCore()
   local width = 200 * FONT_SCALE
   local height = 175 * FONT_SCALE
-  local ui = ServerPointsAdminPanel:new((core:getScreenWidth() - width)/2, (core:getScreenHeight() - height)/2, width, height);
-  ui:initialise();
-  ui:addToUIManager();
+  local ui = ServerPointsAdminPanel:new((core:getScreenWidth() - width)/2, (core:getScreenHeight() - height)/2, width, height)
+  ui:initialise()
+  ui:addToUIManager()
 end
 
 local oldISAdminPanelUI_create = ISAdminPanelUI.create

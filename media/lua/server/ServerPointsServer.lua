@@ -39,29 +39,41 @@ local function OnInitGlobalModData(isNewGame)
 	end
 end
 
-local function OnClientCommand(module, command, player, args)
-	if module == "ServerPoints" then
-		if command == "get" then
-	    sendServerCommand(player, module, command, {serverPointsData[player:getUsername()] or 0})
-		elseif command == "buy" then
-			print(string.format("[SERVER POINTS] %s bought %s for %d points", player:getUsername(), args[2], args[1]))
-			if not serverPointsData[player:getUsername()] then serverPointsData[player:getUsername()] = 0 end
-			serverPointsData[player:getUsername()] = serverPointsData[player:getUsername()] - math.abs(args[1])
-		elseif command == "vehicle" then
-			local vehicle = addVehicleDebug(args[1], IsoDirections.S, nil, player:getSquare())
-      vehicle:repair()
-			player:sendObjectChange("addItem", {item = vehicle:createVehicleKey()})
-		elseif command == "add" and player:getAccessLevel() == "Admin" then
-			print(string.format("[SERVER POINTS] %s gave %s %d points", player:getUsername(), args[1], args[2]))
-			if not serverPointsData[args[1]] then serverPointsData[args[1]] = 0 end
-			serverPointsData[args[1]] = serverPointsData[args[1]] + args[2]
-		elseif command == "load" then
-			sendServerCommand(player, module, command, listings)
-		elseif command == "reload" then
-			LoadListings()
-		end
-	end
+local ServerPointsCommands = {}
+
+function ServerPointsCommands.get(module, command, player, args)
+	sendServerCommand(player, module, command, {serverPointsData[player:getUsername()] or 0})
 end
 
-Events.OnClientCommand.Add(OnClientCommand)
+function ServerPointsCommands.buy(module, command, player, args)
+	print(string.format("[SERVER POINTS] %s bought %s for %d points", player:getUsername(), args[2], args[1]))
+	if not serverPointsData[player:getUsername()] then serverPointsData[player:getUsername()] = 0 end
+	serverPointsData[player:getUsername()] = serverPointsData[player:getUsername()] - math.abs(args[1])
+end
+
+function ServerPointsCommands.vehicle(module, command, player, args)
+	local vehicle = addVehicleDebug(args[1], IsoDirections.S, nil, player:getSquare())
+	vehicle:repair()
+	player:sendObjectChange("addItem", {item = vehicle:createVehicleKey()})
+end
+
+function ServerPointsCommands.add(module, command, player, args)
+	print(string.format("[SERVER POINTS] %s gave %s %d points", player:getUsername(), args[1], args[2]))
+	if not serverPointsData[args[1]] then serverPointsData[args[1]] = 0 end
+	serverPointsData[args[1]] = serverPointsData[args[1]] + args[2]
+end
+
+function ServerPointsCommands.load(module, command, player, args)
+	sendServerCommand(player, module, command, listings)
+end
+
+function ServerPointsCommands.reload(module, command, player, args)
+	LoadListings()
+end
+
+Events.OnClientCommand.Add(function(module, command, player, args)
+	if module == "ServerPoints" and ServerPointsCommands[command] then
+		ServerPointsCommands[command](module, command, player, args)
+	end
+end)
 Events.OnInitGlobalModData.Add(OnInitGlobalModData)
