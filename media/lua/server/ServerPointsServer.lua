@@ -22,7 +22,7 @@ local function LoadListings()
 		line = fileReader:readLine()
 	end
   fileReader:close()
-	listings = loadstring(table.concat(lines))() or {}
+	listings = loadstring(table.concat(lines))() or {["Missing Configuration"] = {}}
 end
 
 local function OnInitGlobalModData(isNewGame)
