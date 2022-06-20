@@ -15,7 +15,11 @@ function MainScreen:instantiate()
   oldMainScreen_instantiate(self)
 
   if self.inGame and isClient() then
-    self.serverPoints = ServerPointsUI:new(getCore():getScreenWidth() / 2 - 400, getCore():getScreenHeight() / 2 - 300, 800, 600)
+    local FONT_SCALE = getTextManager():getFontHeight(UIFont.Small) / 14
+    local core = getCore()
+    local width = 800 * FONT_SCALE
+    local height = 600 * FONT_SCALE
+    self.serverPoints = ServerPointsUI:new((core:getScreenWidth() - width)/2, (core:getScreenHeight() - height)/2, width, height)
     self.serverPoints:initialise()
     self.serverPoints:setVisible(false)
     self.serverPoints:setAnchorRight(true)
