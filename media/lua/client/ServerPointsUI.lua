@@ -121,7 +121,7 @@ function ServerPointsUI:onOptionMouseDown(button, x, y)
     self.points = self.points - row.price
     sendClientCommand("ServerPoints", "buy", {row.price, row.target})
     if row.type == "ITEM" then
-      getPlayer():getInventory():AddItems(row.target, row.quantity)
+      getPlayer():getInventory():AddItems(row.target, row.quantity or 1)
     elseif row.type == "VEHICLE" then
       sendClientCommand("ServerPoints", "vehicle", {row.target})
     elseif row.type == "XP" then
