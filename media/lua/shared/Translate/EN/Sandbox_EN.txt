@@ -1,0 +1,14 @@
+Sandbox_EN = {
+	Sandbox_ServerPoints = "Server Points",
+
+	Sandbox_PointsName = "Points Name",
+
+	Sandbox_PointsFrequency = "Award Frequency",
+	Sandbox_PointsFrequency_tooltip = "Requires Server Restart To Apply",
+	Sandbox_PointsFrequency_option1 = "Disabled",
+	Sandbox_PointsFrequency_option2 = "Every Ten Minutes",
+	Sandbox_PointsFrequency_option3 = "Every Hour",
+	Sandbox_PointsFrequency_option4 = "Every Day",
+
+	Sandbox_ServerPoints_PointsPerTick = "Points Per Tick",
+}

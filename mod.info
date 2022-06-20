@@ -1,0 +1,6 @@
+name=Server Points
+poster=poster.png
+id=ServerPoints
+versionMin=41.67
+description=Reward players based on play time.
+url=
