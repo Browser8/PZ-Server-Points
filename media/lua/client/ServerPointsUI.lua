@@ -147,7 +147,7 @@ function ServerPointsUI:onOptionMouseDown(button, x, y)
     if self.preview then
       self.preview.javaObject:fromLua2("setVehicleScript", "vehicle", self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected].target)
     else
-      self.preview = ISUI3DScene:new(self.x + self.width, self.y, 400, 400)
+      self.preview = ISUI3DScene:new(self.x + self.width, self.y, 400 * FONT_SCALE, self.height)
       self.preview:initialise()
       self.parent:addChild(self.preview)
       self.preview.onMouseMove = function(self, dx, dy)
@@ -166,8 +166,20 @@ function ServerPointsUI:onOptionMouseDown(button, x, y)
       self.preview.javaObject:fromLua1("createVehicle", "vehicle")
       self.preview.javaObject:fromLua1("setView", "UserDefined")
       self.preview.javaObject:fromLua3("setViewRotation", 45 / 2, 45, 0)
+      self.preview.javaObject:fromLua2("dragView", 0, 30)
       self.preview.javaObject:fromLua1("setZoom", 6)
       self.preview.javaObject:fromLua2("setVehicleScript", "vehicle", self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected].target)
+
+      self.preview.closeButton = ISButton:new(self.preview.width - 15 * FONT_SCALE, 5 * FONT_SCALE, 10 * FONT_SCALE, 10 * FONT_SCALE, nil, self.preview, function(self)
+        self:setVisible(false)
+        self:removeFromUIManager()
+        ServerPointsUI.instance.preview = nil
+      end)
+      self.preview.closeButton:setDisplayBackground(false)
+      self.preview.closeButton:setImage(getTexture("media/ui/Dialog_Titlebar_CloseIcon.png"))
+      self.preview.closeButton:forceImageSize(self.preview.closeButton.width, self.preview.closeButton.height)
+      self.preview.closeButton:initialise()
+      self.preview:addChild(self.preview.closeButton)
     end
   end
 end
