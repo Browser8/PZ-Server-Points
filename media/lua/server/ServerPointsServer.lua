@@ -42,7 +42,7 @@ end
 local ServerPointsCommands = {}
 
 function ServerPointsCommands.get(module, command, player, args)
-	sendServerCommand(player, module, command, {serverPointsData[player:getUsername()] or 0})
+	sendServerCommand(player, module, command, {serverPointsData[args and args[1] or player:getUsername()] or 0})
 end
 
 function ServerPointsCommands.buy(module, command, player, args)
