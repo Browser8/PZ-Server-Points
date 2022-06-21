@@ -28,15 +28,16 @@ function ServerPointsUI:setVisible(visible)
   end
 end
 
-local function LoadListings(module, command, arguments)
+function ServerPointsUI.LoadListings(module, command, arguments)
   if module == "ServerPoints" and command == "load" then
-    Events.OnServerCommand.Remove(LoadListings)
+    Events.OnServerCommand.Remove(ServerPointsUI.LoadListings)
     local scriptManager = getScriptManager()
     for k, v in pairs(arguments) do
       local scrollingList = ISScrollingListBox:new(1, 0, ServerPointsUI.instance.tabPanel.width - 2, ServerPointsUI.instance.tabPanel.height - ServerPointsUI.instance.tabPanel.tabHeight)
       scrollingList.itemPadY = 10 * FONT_SCALE
       scrollingList.itemheight = FONT_HGT_LARGE + scrollingList.itemPadY * 2 + 1 * FONT_SCALE + FONT_HGT_SMALL
       scrollingList.textureHeight = scrollingList.itemheight - scrollingList.itemPadY * 2
+      scrollingList.mouseoverselected = -1
       scrollingList:initialise()
       scrollingList.doDrawItem = ServerPointsUI.doDrawItem
       ServerPointsUI.instance.tabPanel:addView(k, scrollingList)
@@ -69,7 +70,7 @@ end
 
 local function OnTick()
   Events.OnTick.Remove(OnTick)
-  Events.OnServerCommand.Add(LoadListings)
+  Events.OnServerCommand.Add(ServerPointsUI.LoadListings)
   sendClientCommand("ServerPoints", "load", nil)
 end
 
@@ -111,11 +112,25 @@ function ServerPointsUI:createChildren()
   self.cancelButton:initialise()
   self.cancelButton:instantiate()
   self:addChild(self.cancelButton)
+
+  if getDebug() then
+    self.reloadButton = ISButton:new(self.cancelButton.x - padBottom - btnWid, self.cancelButton.y, btnWid, btnHgt, "RELOAD", self, ServerPointsUI.onOptionMouseDown)
+    self.reloadButton.internal = "RELOAD"
+    self.reloadButton:initialise()
+    self.reloadButton:instantiate()
+    self:addChild(self.reloadButton)
+  end
 end
 
 function ServerPointsUI:onOptionMouseDown(button, x, y)
   if button.internal == "CANCEL" then
     self:setVisible(false)
+  elseif button.internal == "RELOAD" then
+    for i, v in ipairs(self.tabPanel.viewList) do
+      self.tabPanel:removeView(v.view)
+    end
+    Events.OnServerCommand.Add(ServerPointsUI.LoadListings)
+    sendClientCommand("ServerPoints", "load", nil)
   elseif button.internal == "BUY" then
     local row = self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected]
     self.points = self.points - row.price
@@ -271,7 +286,8 @@ function ServerPointsUI:render()
 
   self:drawText(self.serverMsg, 10 * FONT_SCALE, self.tabPanel:getBottom() + 1 + 10 * FONT_SCALE, 1, 1, 1, 1, UIFont.Medium)
 
-  local view = self.tabPanel.activeView.view
+  local view = self.tabPanel.activeView
+  if view then view = view.view else return end
   if view.mouseoverselected == -1 then
     self.buyButton:setVisible(false)
     self.previewButton:setVisible(false)
