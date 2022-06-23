@@ -140,8 +140,7 @@ function ServerPointsUI:onOptionMouseDown(button, x, y)
     elseif row.type == "VEHICLE" then
       sendClientCommand("ServerPoints", "vehicle", {row.target})
     elseif row.type == "XP" then
-      getPlayer():getXp():AddXP(Perks[row.target], row.quantity)
-      sendAddXp(getPlayer(), Perks[row.target], row.quantity)
+      getPlayer():getXp():AddXP(Perks[row.target], row.quantity, true, false, false)
     end
   elseif button.internal == "PREVIEW" then
     if self.preview then
@@ -241,12 +240,9 @@ function ServerPointsUI:addView(name, view)
   viewObject.tabWidth = getTextManager():MeasureStringX(self.tabFont, name) + self.tabPadX
   viewObject.fade = UITransition.new()
   table.insert(self.viewList, viewObject)
-  -- the view have to be under our tab
   view:setY(self.tabHeight)
-  --	view:initialise()
   self:addChild(view)
   view.parent = self
-  -- the 1st view will be default visible
   if #self.viewList == 1 then
     view:setVisible(true)
     self.activeView = viewObject
@@ -339,24 +335,3 @@ function ServerPointsUI:new(x, y, width, height)
 end
 
 return ServerPointsUI
-
--- VEHICLE RENDERING IN UI
---local ui = ISUI3DScene:new(200, 200, 400, 400)
---ui:initialise()
---ui:addToUIManager()
---ui.onMouseMove = function(self, dx, dy)
---	if self.mouseDown then
---		local vector = self:getRotation()
---		self:setRotation(vector:x() + dy, vector:y() + dx)
---	end
---end
---ui.setRotation = function(self, x, y)
---	self.javaObject:fromLua3("setViewRotation", x, y, 0)
---end
---ui.getRotation = function(self)
---	return self.javaObject:fromLua0("getViewRotation")
---end
---ui.javaObject:fromLua1("setDrawGrid", false)
---ui.javaObject:fromLua1("createVehicle", "vehicle")
---ui.javaObject:fromLua1("setView", "UserDefined")
---ui.javaObject:fromLua2("setVehicleScript", "vehicle", "Base.SportsCar")
