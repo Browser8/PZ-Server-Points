@@ -77,3 +77,5 @@ Events.OnClientCommand.Add(function(module, command, player, args)
 	end
 end)
 Events.OnInitGlobalModData.Add(OnInitGlobalModData)
+
+return ServerPointsCommands
