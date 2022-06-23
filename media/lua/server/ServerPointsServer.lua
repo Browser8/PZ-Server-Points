@@ -53,6 +53,12 @@ end
 
 function ServerPointsCommands.vehicle(module, command, player, args)
 	local vehicle = addVehicleDebug(args[1], IsoDirections.S, nil, player:getSquare())
+	for i = 0, vehicle:getPartCount() - 1 do
+		local container = vehicle:getPartByIndex(i):getItemContainer()
+		if container then
+			container:removeAllItems()
+		end
+	end
 	vehicle:repair()
 	player:sendObjectChange("addItem", {item = vehicle:createVehicleKey()})
 end
