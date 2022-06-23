@@ -1,5 +1,8 @@
 
 local ServerPointsUI = ISPanel:derive("ServerPointsUI")
+ServerPointsUI.BuyType = {}
+ServerPointsUI.DrawType = {}
+ServerPointsUI.LoadType = {}
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
@@ -28,10 +31,30 @@ function ServerPointsUI:setVisible(visible)
   end
 end
 
+function ServerPointsUI.LoadType.ITEM(row, entry)
+  local item = getScriptManager():getItem(entry.target)
+  row.text = item:getDisplayName()
+  row.texture = item:getNormalTexture()
+end
+
+function ServerPointsUI.LoadType.VEHICLE(row, entry)
+  row.text = getScriptManager():getVehicle(entry.target):getName()
+  row.texture = getTexture("Item_CarKey")
+end
+
+function ServerPointsUI.LoadType.XP(row, entry)
+  row.text = entry.target .. " XP"
+  row.texture = getTexture("media/ui/Moodle_internal_plus_green.png")
+end
+
+--function ServerPointsUI.LoadType.XPBOOST(row, entry)
+--  row.text = entry.target .. " Boost"
+--  row.texture = getTexture("chevron_double")
+--end
+
 function ServerPointsUI.LoadListings(module, command, arguments)
   if module == "ServerPoints" and command == "load" then
     Events.OnServerCommand.Remove(ServerPointsUI.LoadListings)
-    local scriptManager = getScriptManager()
     for k, v in pairs(arguments) do
       local scrollingList = ISScrollingListBox:new(1, 0, ServerPointsUI.instance.tabPanel.width - 2, ServerPointsUI.instance.tabPanel.height - ServerPointsUI.instance.tabPanel.tabHeight)
       scrollingList.itemPadY = 10 * FONT_SCALE
@@ -47,19 +70,8 @@ function ServerPointsUI.LoadListings(module, command, arguments)
         row.target = entry.target
         row.quantity = entry.quantity
         row.price = entry.price
-        if entry.type == "ITEM" then
-          local item = scriptManager:getItem(entry.target)
-          row.text = item:getDisplayName()
-          row.texture = item:getNormalTexture()
-        elseif entry.type == "VEHICLE" then
-          row.text = scriptManager:getVehicle(entry.target):getName()
-          row.texture = getTexture("Item_CarKey")
-        elseif entry.type == "XP" then
-          row.text = entry.target .. " XP"
-          row.texture = getTexture("media/ui/Moodle_internal_plus_green.png")
-        elseif entry.type == "XPBOOST" then
-          row.text = entry.target .. " Boost"
-          row.texture = getTexture("chevron_double")
+        if ServerPointsUI.LoadType[entry.type] then
+          ServerPointsUI.LoadType[entry.type](row, entry)
         else
           row.text = entry.type .. ":" .. entry.target
         end
@@ -122,6 +134,21 @@ function ServerPointsUI:createChildren()
   end
 end
 
+function ServerPointsUI.BuyType.ITEM(row)
+  sendClientCommand("ServerPoints", "buy", {row.price, row.target})
+  getPlayer():getInventory():AddItems(row.target, row.quantity or 1)
+end
+
+function ServerPointsUI.BuyType.VEHICLE(row)
+  sendClientCommand("ServerPoints", "buy", {row.price, row.target})
+  sendClientCommand("ServerPoints", "vehicle", {row.target})
+end
+
+function ServerPointsUI.BuyType.XP(row)
+  sendClientCommand("ServerPoints", "buy", {row.price, row.target})
+  getPlayer():getXp():AddXP(Perks[row.target], row.quantity, true, false, false)
+end
+
 function ServerPointsUI:onOptionMouseDown(button, x, y)
   if button.internal == "CANCEL" then
     self:setVisible(false)
@@ -134,14 +161,11 @@ function ServerPointsUI:onOptionMouseDown(button, x, y)
   elseif button.internal == "BUY" then
     local row = self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected]
     self.points = self.points - row.price
-    sendClientCommand("ServerPoints", "buy", {row.price, row.target})
-    if row.type == "ITEM" then
-      getPlayer():getInventory():AddItems(row.target, row.quantity or 1)
-    elseif row.type == "VEHICLE" then
-      sendClientCommand("ServerPoints", "vehicle", {row.target})
-    elseif row.type == "XP" then
-      getPlayer():getXp():AddXP(Perks[row.target], row.quantity, true, false, false)
+    if ServerPointsUI.BuyType[row.type] then
+      ServerPointsUI.BuyType[row.type](row)
     end
+    Events.OnServerCommand.Add(OnServerCommand)
+    sendClientCommand("ServerPoints", "get", nil)
   elseif button.internal == "PREVIEW" then
     if self.preview then
       self.preview.javaObject:fromLua2("setVehicleScript", "vehicle", self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected].target)
@@ -255,7 +279,7 @@ function ServerPointsUI:addView(name, view)
   end
 end
 
-function ServerPointsUI:doDrawItem(y, item, alt)
+function ServerPointsUI.DrawType.ITEM(self, y, item, alt)
   self:drawRectBorder(0, y, self:getWidth(), item.height, 0.5, self.borderColor.r, self.borderColor.g, self.borderColor.b)
   local x = self.itemPadY
   local z = y + self.itemPadY
@@ -273,9 +297,20 @@ function ServerPointsUI:doDrawItem(y, item, alt)
   x = self.width - 75
   z = y + (item.height - FONT_HGT_LARGE) / 2
   self:drawText(tostring(item.price), x, z, 0.7, 0.7, 0.7, 1.0, self.font)
+end
 
-  y = y + item.height
-  return y
+ServerPointsUI.DrawType.VEHICLE = ServerPointsUI.DrawType.ITEM
+
+ServerPointsUI.DrawType.XP = ServerPointsUI.DrawType.ITEM
+
+function ServerPointsUI:doDrawItem(y, item, alt)
+  if ServerPointsUI.DrawType[item.type] then
+    ServerPointsUI.DrawType[item.type](self, y, item, alt)
+  else
+    ServerPointsUI.DrawType.ITEM(self, y, item, alt)
+  end
+
+  return y + item.height
 end
 
 function ServerPointsUI:render()
