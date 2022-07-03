@@ -101,8 +101,7 @@ function ServerPointsUI:createChildren()
   self:addChild(self.tabPanel)
   Events.OnTick.Add(OnTick)
 
-  self.previewButton = ISButton:new(self.width - 200 * FONT_SCALE - padBottom * 2, 0, 100 * FONT_SCALE, FONT_HGT_LARGE + 1 * FONT_SCALE + FONT_HGT_SMALL, "PREVIEW", self, ServerPointsUI.onOptionMouseDown)
-  self.previewButton.internal = "PREVIEW"
+  self.previewButton = ISButton:new(self.width - 200 * FONT_SCALE - padBottom * 2, 0, 100 * FONT_SCALE, FONT_HGT_LARGE + 1 * FONT_SCALE + FONT_HGT_SMALL, "PREVIEW", self, ServerPointsUI.onPreview)
   self.previewButton:initialise()
   self.previewButton:instantiate()
   self.previewButton.borderColor = self.buttonBorderColor
@@ -110,8 +109,7 @@ function ServerPointsUI:createChildren()
   self.previewButton.font = UIFont.Medium
   self:addChild(self.previewButton)
 
-  self.buyButton = ISButton:new(self.width - 100 * FONT_SCALE - padBottom, 0, 100 * FONT_SCALE, FONT_HGT_LARGE + 1 * FONT_SCALE + FONT_HGT_SMALL, "BUY", self, ServerPointsUI.onOptionMouseDown)
-  self.buyButton.internal = "BUY"
+  self.buyButton = ISButton:new(self.width - 100 * FONT_SCALE - padBottom, 0, 100 * FONT_SCALE, FONT_HGT_LARGE + 1 * FONT_SCALE + FONT_HGT_SMALL, "BUY", self, ServerPointsUI.onBuy)
   self.buyButton:initialise()
   self.buyButton:instantiate()
   self.buyButton.borderColor = self.buttonBorderColor
@@ -119,19 +117,29 @@ function ServerPointsUI:createChildren()
   self.buyButton.font = UIFont.Medium
   self:addChild(self.buyButton)
 
-  self.cancelButton = ISButton:new(self.width - padBottom - btnWid, self.height - padBottom - btnHgt, btnWid, btnHgt, getText("UI_btn_close"), self, ServerPointsUI.onOptionMouseDown)
-  self.cancelButton.internal = "CANCEL"
+  self.cancelButton = ISButton:new(self.width - padBottom - btnWid, self.height - padBottom - btnHgt, btnWid, btnHgt, getText("UI_btn_close"), self, ServerPointsUI.close)
   self.cancelButton:initialise()
   self.cancelButton:instantiate()
   self:addChild(self.cancelButton)
 
   if getDebug() then
-    self.reloadButton = ISButton:new(self.cancelButton.x - padBottom - btnWid, self.cancelButton.y, btnWid, btnHgt, "RELOAD", self, ServerPointsUI.onOptionMouseDown)
-    self.reloadButton.internal = "RELOAD"
+    self.reloadButton = ISButton:new(self.cancelButton.x - padBottom - btnWid, self.cancelButton.y, btnWid, btnHgt, "RELOAD", self, ServerPointsUI.onReload)
     self.reloadButton:initialise()
     self.reloadButton:instantiate()
     self:addChild(self.reloadButton)
   end
+end
+
+function ServerPointsUI:close()
+  self:setVisible(false)
+end
+
+function ServerPointsUI:onReload()
+  for i, v in ipairs(self.tabPanel.viewList) do
+    self.tabPanel:removeView(v.view)
+  end
+  Events.OnServerCommand.Add(ServerPointsUI.LoadListings)
+  sendClientCommand("ServerPoints", "load", nil)
 end
 
 function ServerPointsUI.BuyType.ITEM(row)
@@ -149,61 +157,53 @@ function ServerPointsUI.BuyType.XP(row)
   getPlayer():getXp():AddXP(Perks[row.target], row.quantity, true, false, false)
 end
 
-function ServerPointsUI:onOptionMouseDown(button, x, y)
-  if button.internal == "CANCEL" then
-    self:setVisible(false)
-  elseif button.internal == "RELOAD" then
-    for i, v in ipairs(self.tabPanel.viewList) do
-      self.tabPanel:removeView(v.view)
-    end
-    Events.OnServerCommand.Add(ServerPointsUI.LoadListings)
-    sendClientCommand("ServerPoints", "load", nil)
-  elseif button.internal == "BUY" then
-    local row = self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected]
-    self.points = self.points - row.price
-    if ServerPointsUI.BuyType[row.type] then
-      ServerPointsUI.BuyType[row.type](row)
-    end
-    Events.OnServerCommand.Add(OnServerCommand)
-    sendClientCommand("ServerPoints", "get", nil)
-  elseif button.internal == "PREVIEW" then
-    if self.preview then
-      self.preview.javaObject:fromLua2("setVehicleScript", "vehicle", self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected].target)
-    else
-      self.preview = ISUI3DScene:new(self.x + self.width, self.y, 400 * FONT_SCALE, self.height)
-      self.preview:initialise()
-      self.parent:addChild(self.preview)
-      self.preview.onMouseMove = function(self, dx, dy)
-        if self.mouseDown then
-          local vector = self:getRotation()
-          self:setRotation(vector:x() + dy, vector:y() + dx)
-        end
-      end
-      self.preview.setRotation = function(self, x, y)
-        self.javaObject:fromLua3("setViewRotation", x, y, 0)
-      end
-      self.preview.getRotation = function(self)
-        return self.javaObject:fromLua0("getViewRotation")
-      end
-      self.preview.javaObject:fromLua1("setDrawGrid", false)
-      self.preview.javaObject:fromLua1("createVehicle", "vehicle")
-      self.preview.javaObject:fromLua1("setView", "UserDefined")
-      self.preview.javaObject:fromLua3("setViewRotation", 45 / 2, 45, 0)
-      self.preview.javaObject:fromLua2("dragView", 0, 30)
-      self.preview.javaObject:fromLua1("setZoom", 6)
-      self.preview.javaObject:fromLua2("setVehicleScript", "vehicle", self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected].target)
+function ServerPointsUI:onBuy()
+  local row = self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected]
+  self.points = self.points - row.price
+  if ServerPointsUI.BuyType[row.type] then
+    ServerPointsUI.BuyType[row.type](row)
+  end
+  Events.OnServerCommand.Add(OnServerCommand)
+  sendClientCommand("ServerPoints", "get", nil)
+end
 
-      self.preview.closeButton = ISButton:new(self.preview.width - 15 * FONT_SCALE, 5 * FONT_SCALE, 10 * FONT_SCALE, 10 * FONT_SCALE, nil, self.preview, function(self)
-        self:setVisible(false)
-        self:removeFromUIManager()
-        ServerPointsUI.instance.preview = nil
-      end)
-      self.preview.closeButton:setDisplayBackground(false)
-      self.preview.closeButton:setImage(getTexture("media/ui/Dialog_Titlebar_CloseIcon.png"))
-      self.preview.closeButton:forceImageSize(self.preview.closeButton.width, self.preview.closeButton.height)
-      self.preview.closeButton:initialise()
-      self.preview:addChild(self.preview.closeButton)
+function ServerPointsUI:onPreview()
+  if self.preview then
+    self.preview.javaObject:fromLua2("setVehicleScript", "vehicle", self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected].target)
+  else
+    self.preview = ISUI3DScene:new(self.x + self.width, self.y, 400 * FONT_SCALE, self.height)
+    self.preview:initialise()
+    self.parent:addChild(self.preview)
+    self.preview.onMouseMove = function(self, dx, dy)
+      if self.mouseDown then
+        local vector = self:getRotation()
+        self:setRotation(vector:x() + dy, vector:y() + dx)
+      end
     end
+    self.preview.setRotation = function(self, x, y)
+      self.javaObject:fromLua3("setViewRotation", x, y, 0)
+    end
+    self.preview.getRotation = function(self)
+      return self.javaObject:fromLua0("getViewRotation")
+    end
+    self.preview.javaObject:fromLua1("setDrawGrid", false)
+    self.preview.javaObject:fromLua1("createVehicle", "vehicle")
+    self.preview.javaObject:fromLua1("setView", "UserDefined")
+    self.preview.javaObject:fromLua3("setViewRotation", 45 / 2, 45, 0)
+    self.preview.javaObject:fromLua2("dragView", 0, 30)
+    self.preview.javaObject:fromLua1("setZoom", 6)
+    self.preview.javaObject:fromLua2("setVehicleScript", "vehicle", self.tabPanel.activeView.view.items[self.tabPanel.activeView.view.mouseoverselected].target)
+
+    self.preview.closeButton = ISButton:new(self.preview.width - 15 * FONT_SCALE, 5 * FONT_SCALE, 10 * FONT_SCALE, 10 * FONT_SCALE, nil, self.preview, function(self)
+      self:setVisible(false)
+      self:removeFromUIManager()
+      ServerPointsUI.instance.preview = nil
+    end)
+    self.preview.closeButton:setDisplayBackground(false)
+    self.preview.closeButton:setImage(getTexture("media/ui/Dialog_Titlebar_CloseIcon.png"))
+    self.preview.closeButton:forceImageSize(self.preview.closeButton.width, self.preview.closeButton.height)
+    self.preview.closeButton:initialise()
+    self.preview:addChild(self.preview.closeButton)
   end
 end
 
