@@ -279,7 +279,7 @@ function ServerPointsUI:addView(name, view)
   end
 end
 
-function ServerPointsUI.DrawType.ITEM(self, y, item, alt)
+function ServerPointsUI.DrawType.DEFAULT(self, y, item, alt)
   self:drawRectBorder(0, y, self:getWidth(), item.height, 0.5, self.borderColor.r, self.borderColor.g, self.borderColor.b)
   local x = self.itemPadY
   local z = y + self.itemPadY
@@ -299,15 +299,11 @@ function ServerPointsUI.DrawType.ITEM(self, y, item, alt)
   self:drawText(tostring(item.price), x, z, 0.7, 0.7, 0.7, 1.0, self.font)
 end
 
-ServerPointsUI.DrawType.VEHICLE = ServerPointsUI.DrawType.ITEM
-
-ServerPointsUI.DrawType.XP = ServerPointsUI.DrawType.ITEM
-
 function ServerPointsUI:doDrawItem(y, item, alt)
   if ServerPointsUI.DrawType[item.type] then
     ServerPointsUI.DrawType[item.type](self, y, item, alt)
   else
-    ServerPointsUI.DrawType.ITEM(self, y, item, alt)
+    ServerPointsUI.DrawType.DEFAULT(self, y, item, alt)
   end
 
   return y + item.height
