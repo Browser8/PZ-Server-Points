@@ -342,12 +342,16 @@ function ServerPointsUI:render()
     local row = view.items[view.mouseoverselected]
     z = (view.mouseoverselected - 1) * view.itemheight + view:getYScroll() + view.itemPadY + view.y + view.parent.y
 
-    self.buyButton:setY(z)
-    self.buyButton:setVisible(true)
-    if self.points < row.price then
-      self.buyButton:setEnable(false)
+    if ServerPointsUI.BuyType[row.type] then
+      self.buyButton:setY(z)
+      self.buyButton:setVisible(true)
+      if self.points < row.price then
+        self.buyButton:setEnable(false)
+      else
+        self.buyButton:setEnable(true)
+      end
     else
-      self.buyButton:setEnable(true)
+      self.buyButton:setVisible(false)
     end
 
     if ServerPointsUI.PreviewType[row.type] then
