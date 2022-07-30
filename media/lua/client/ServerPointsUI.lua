@@ -33,6 +33,7 @@ function ServerPointsUI:setVisible(visible)
 end
 
 function ServerPointsUI.LoadType.ITEM(row, entry)
+  row.quantity = entry.quantity or 1
   local item = getScriptManager():getItem(entry.target)
   row.text = item:getDisplayName()
   row.texture = item:getNormalTexture()
@@ -44,6 +45,7 @@ function ServerPointsUI.LoadType.VEHICLE(row, entry)
 end
 
 function ServerPointsUI.LoadType.XP(row, entry)
+  row.quantity = entry.quantity or 1
   row.text = entry.target .. " XP"
   row.texture = getTexture("media/ui/Moodle_internal_plus_green.png")
 end
@@ -66,15 +68,14 @@ function ServerPointsUI.LoadListings(module, command, arguments)
       scrollingList.doDrawItem = ServerPointsUI.doDrawItem
       ServerPointsUI.instance.tabPanel:addView(k, scrollingList)
       for _, entry in ipairs(v) do
-        local row = scrollingList:addItem(entry.target, nil)
+        local row = scrollingList:addItem(entry.type, nil)
         row.type = entry.type
         row.target = entry.target
-        row.quantity = entry.quantity
-        row.price = entry.price
+        row.price = entry.price or 0
         if ServerPointsUI.LoadType[entry.type] then
           ServerPointsUI.LoadType[entry.type](row, entry)
         else
-          row.text = entry.type .. ":" .. entry.target
+          row.text = entry.type .. ":" .. tostring(entry.target)
         end
       end
     end
@@ -145,7 +146,7 @@ end
 
 function ServerPointsUI.BuyType.ITEM(row)
   sendClientCommand("ServerPoints", "buy", {row.price, row.target})
-  getPlayer():getInventory():AddItems(row.target, row.quantity or 1)
+  getPlayer():getInventory():AddItems(row.target, row.quantity)
 end
 
 function ServerPointsUI.BuyType.VEHICLE(row)
