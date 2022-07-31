@@ -50,6 +50,16 @@ function ServerPointsUI.LoadType.XP(row, entry)
   row.texture = getTexture("media/ui/Moodle_internal_plus_green.png")
 end
 
+function ServerPointsUI.LoadType.DIV(row, entry)
+  row.target = row.target or {}
+  if type(entry.target) == "string" then
+    row.target = {}
+    for text in entry.target:gmatch("([^\n]+)") do table.insert(row.target, text) end
+  end
+  row.font = row.height > #row.target * (FONT_HGT_LARGE + 1 * FONT_SCALE) and UIFont.Large or row.height > #row.target * (FONT_HGT_MEDIUM + 1 * FONT_SCALE) and UIFont.Medium or UIFont.Small
+  row.fontHeight = getTextManager():getFontHeight(row.font)
+end
+
 --function ServerPointsUI.LoadType.XPBOOST(row, entry)
 --  row.text = entry.target .. " Boost"
 --  row.texture = getTexture("chevron_double")
@@ -285,6 +295,15 @@ function ServerPointsUI:addView(name, view)
     if viewObject.tabWidth > self.maxLength then
       self.maxLength = viewObject.tabWidth
     end
+  end
+end
+
+function ServerPointsUI.DrawType.DIV(self, y, item, alt)
+  self:drawRectBorder(0, y, self:getWidth(), item.height, 0.5, self.borderColor.r, self.borderColor.g, self.borderColor.b)
+  y = y + (item.height - #item.target * item.fontHeight)/2
+  for i, v in ipairs(item.target) do
+    self:drawTextCentre(v, self.width/2, y, 0.7, 0.7, 0.7, 1.0, item.font)
+    y = y + item.fontHeight + 1 * FONT_SCALE
   end
 end
 
