@@ -29,3 +29,12 @@ option ServerPoints.PointsPerTick
 	page = ServerPoints,
 	translation = ServerPoints_PointsPerTick,
 }
+
+option ServerPoints.ServerMessage
+{
+	type = string,
+	default = Thanks for playing on the server!,
+
+	page = ServerPoints,
+	translation = ServerPoints_ServerMessage,
+}

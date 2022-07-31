@@ -393,7 +393,7 @@ function ServerPointsUI:new(x, y, width, height)
   o.buttonBorderColor = {r = 0.7, g = 0.7, b = 0.7, a = 0.5}
   o.title = string.upper(SandboxVars.ServerPoints.PointsName) .. " SHOP"
   o.available = SandboxVars.ServerPoints.PointsName .. " available"
-  o.serverMsg = "Thanks for playing on the server!"
+  o.serverMsg = SandboxVars.ServerPoints.ServerMessage
   o.points = 0
   ServerPointsUI.instance = o
   return o

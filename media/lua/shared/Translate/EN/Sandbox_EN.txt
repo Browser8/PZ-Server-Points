@@ -11,4 +11,6 @@ Sandbox_EN = {
 	Sandbox_PointsFrequency_option4 = "Every Day",
 
 	Sandbox_ServerPoints_PointsPerTick = "Points Per Tick",
+
+	Sandbox_ServerPoints_ServerMessage = "Server Message",
 }
