@@ -186,7 +186,9 @@ function ServerPointsUI.PreviewType.VEHICLE(self)
   self.preview.onMouseMove = function(self, dx, dy)
     if self.mouseDown then
       local vector = self:getRotation()
-      self:setRotation(vector:x() + dy, vector:y() + dx)
+      local x = vector:x() + dy
+      x = x > 90 and 90 or x < -90 and -90 or x
+      self:setRotation(x, vector:y() + dx)
     end
   end
   self.preview.setRotation = function(self, x, y)
