@@ -1,0 +1,14 @@
+module Base
+{
+
+	recipe Redeem Points
+	{
+      ServerPoints,
+
+      Result:ServerPoints,
+      RemoveResultItem:true,
+      OnCreate:Recipe.OnCreate.RedeemPoints,
+      Time:0,
+	}
+
+}

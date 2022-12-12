@@ -1,0 +1,13 @@
+module Base
+{
+
+	item ServerPoints
+	{
+      DisplayCategory = Tool,
+      DisplayName	=	ServerPoints,
+      Weight	=	0,
+      Type	=	Normal,
+      Icon	=	Question_On,
+	}
+
+}

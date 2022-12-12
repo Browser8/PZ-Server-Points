@@ -55,6 +55,11 @@ function ServerPointsAdminPanel:createChildren()
   self.takeButton:instantiate()
   self:addChild(self.takeButton)
 
+  self.spawnButton = ISButton:new((self.width - btnWid/2)/2, z+btnHgt+padBottom/2, btnWid/2, btnHgt, "SPAWN", self, ServerPointsAdminPanel.onSpawn)
+  self.spawnButton:initialise()
+  self.spawnButton:instantiate()
+  self:addChild(self.spawnButton)
+
   self.cancelButton = ISButton:new((self.width - btnWid)/2, self.height - padBottom - btnHgt, btnWid, btnHgt, getText("UI_btn_close"), self, ServerPointsAdminPanel.close)
   self.cancelButton:initialise()
   self.cancelButton:instantiate()
@@ -82,26 +87,33 @@ function ServerPointsAdminPanel:onOptionMouseDown(button)
   sendClientCommand("ServerPoints", "get", {self.playerSelect.options[self.playerSelect.selected]})
 end
 
+function ServerPointsAdminPanel:onSpawn()
+  local item = getPlayer():getInventory():AddItem("Base.ServerPoints")
+  local points = tonumber(self.pointsEntry:getText())
+  item:getModData().serverPoints = points
+  item:setName(points .. " " .. SandboxVars.ServerPoints.PointsName)
+end
+
 function ServerPointsAdminPanel.onReload()
-    sendClientCommand("ServerPoints", "reload", nil)
+  sendClientCommand("ServerPoints", "reload", nil)
 end
 
 function ServerPointsAdminPanel:close()
-    self:setVisible(false)
-    self:removeFromUIManager()
-    ServerPointsAdminPanel.instance = nil
+  self:setVisible(false)
+  self:removeFromUIManager()
+  ServerPointsAdminPanel.instance = nil
 end
 
 function ServerPointsAdminPanel:new(x, y, width, height)
-    local o = ISPanel:new(x, y, width, height)
-    setmetatable(o, self)
-    self.__index = self
-    o.borderColor = {r=0.4, g=0.4, b=0.4, a=1}
-    o.backgroundColor = {r=0, g=0, b=0, a=0.8}
-    o.moveWithMouse = true
-    o.balance = "Balance: 0"
-    ServerPointsAdminPanel.instance = o
-    return o
+  local o = ISPanel:new(x, y, width, height)
+  setmetatable(o, self)
+  self.__index = self
+  o.borderColor = {r=0.4, g=0.4, b=0.4, a=1}
+  o.backgroundColor = {r=0, g=0, b=0, a=0.8}
+  o.moveWithMouse = true
+  o.balance = "Balance: 0"
+  ServerPointsAdminPanel.instance = o
+  return o
 end
 
 local function openUI(button)

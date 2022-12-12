@@ -1,4 +1,10 @@
 
+function Recipe.OnCreate.RedeemPoints(items, result, player)
+	local points = items:get(0):getModData().serverPoints or 0
+	sendClientCommand("ServerPoints", "add", {player:getUsername(), points})
+	player:Say("Redeemed " .. points.. " " .. SandboxVars.ServerPoints.PointsName)
+end
+
 if not isServer() then return end
 
 local serverPointsData
@@ -25,7 +31,7 @@ local function LoadListings()
 	listings = loadstring(table.concat(lines))() or {["Missing Configuration"] = {}}
 end
 
-local function OnInitGlobalModData(isNewGame)
+Events.OnInitGlobalModData.Add(function(isNewGame)
 	serverPointsData = ModData.getOrCreate("serverPointsData")
 
 	LoadListings()
@@ -37,7 +43,7 @@ local function OnInitGlobalModData(isNewGame)
 	elseif SandboxVars.ServerPoints.PointsFrequency == 4 then
 	  Events.EveryDays.Add(PointsTick)
 	end
-end
+end)
 
 local ServerPointsCommands = {}
 
@@ -82,6 +88,5 @@ Events.OnClientCommand.Add(function(module, command, player, args)
 		ServerPointsCommands[command](module, command, player, args)
 	end
 end)
-Events.OnInitGlobalModData.Add(OnInitGlobalModData)
 
 return ServerPointsCommands
