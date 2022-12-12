@@ -120,10 +120,12 @@ local oldISAdminPanelUI_create = ISAdminPanelUI.create
 function ISAdminPanelUI:create()
   oldISAdminPanelUI_create(self)
 
-  self.serverPointsBtn = ISButton:new(self.sandboxOptionsBtn.x, self.sandboxOptionsBtn.y + 15 + self.sandboxOptionsBtn.height*3, self.sandboxOptionsBtn.width, self.sandboxOptionsBtn.height, "Server Points Options", nil, openUI)
-  self.serverPointsBtn.internal = "SERVERPOINTS"
-  self.serverPointsBtn:initialise()
-  self.serverPointsBtn:instantiate()
-  self.serverPointsBtn.borderColor = self.buttonBorderColor
-  self:addChild(self.serverPointsBtn)
+  if getAccessLevel() == "admin" then
+    self.serverPointsBtn = ISButton:new(self.sandboxOptionsBtn.x, self.sandboxOptionsBtn.y + 15 + self.sandboxOptionsBtn.height*3, self.sandboxOptionsBtn.width, self.sandboxOptionsBtn.height, "Server Points Options", nil, openUI)
+    self.serverPointsBtn.internal = "SERVERPOINTS"
+    self.serverPointsBtn:initialise()
+    self.serverPointsBtn:instantiate()
+    self.serverPointsBtn.borderColor = self.buttonBorderColor
+    self:addChild(self.serverPointsBtn)
+  end
 end
