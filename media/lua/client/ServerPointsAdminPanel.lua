@@ -133,7 +133,8 @@ function ISAdminPanelUI:create()
     oldISAdminPanelUI_create(self)
 
     if getAccessLevel() == "admin" then
-        self.serverPointsBtn = ISButton:new(self.sandboxOptionsBtn.x, self.sandboxOptionsBtn.y + 15 + self.sandboxOptionsBtn.height * 3, self.sandboxOptionsBtn.width, self.sandboxOptionsBtn.height, "Server Points Options", nil, openUI)
+        local lastButton = self.children[self.IDMax-1].internal == "CANCEL" and self.children[self.IDMax-2] or self.children[self.IDMax-1]
+        self.serverPointsBtn = ISButton:new(lastButton.x, lastButton.y + 5 + lastButton.height, self.sandboxOptionsBtn.width, self.sandboxOptionsBtn.height, "Server Points Options", nil, openUI)
         self.serverPointsBtn.internal = "SERVERPOINTS"
         self.serverPointsBtn:initialise()
         self.serverPointsBtn:instantiate()
