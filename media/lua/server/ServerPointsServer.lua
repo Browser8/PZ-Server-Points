@@ -28,7 +28,7 @@ local function LoadListings()
 		line = fileReader:readLine()
 	end
   fileReader:close()
-	listings = loadstring(table.concat(lines))() or {["Missing Configuration"] = {}}
+	listings = loadstring(table.concat(lines, "\n"))() or {["Missing Configuration"] = {}}
 end
 
 Events.OnInitGlobalModData.Add(function(isNewGame)
