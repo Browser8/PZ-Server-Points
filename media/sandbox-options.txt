@@ -2,39 +2,39 @@ VERSION = 1,
 
 option ServerPoints.PointsName
 {
-  type = string,
-  default = Server Points,
+    type = string,
+    default = Server Points,
 
-  page = ServerPoints,
-  translation = ServerPoints_PointsName
+    page = ServerPoints,
+    translation = ServerPoints_PointsName
 }
 
 option ServerPoints.PointsFrequency
 {
-  type = enum,
-  numValues = 4,
-  default = 3,
+    type = enum,
+    numValues = 4,
+    default = 3,
 
-  page = ServerPoints,
-  translation = ServerPoints_PointsFrequency
+    page = ServerPoints,
+    translation = ServerPoints_PointsFrequency
 }
 
 option ServerPoints.PointsPerTick
 {
-	type = integer,
-	min = 0,
-  max = 2147483647,
-	default = 10,
+    type = integer,
+    min = 0,
+    max = 2147483647,
+    default = 10,
 
-	page = ServerPoints,
-	translation = ServerPoints_PointsPerTick,
+    page = ServerPoints,
+    translation = ServerPoints_PointsPerTick,
 }
 
 option ServerPoints.ServerMessage
 {
-	type = string,
-	default = Thanks for playing on the server!,
+    type = string,
+    default = Thanks for playing on the server!,
 
-	page = ServerPoints,
-	translation = ServerPoints_ServerMessage,
+    page = ServerPoints,
+    translation = ServerPoints_ServerMessage,
 }
